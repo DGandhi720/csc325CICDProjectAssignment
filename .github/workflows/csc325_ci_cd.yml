@@ -1,27 +1,73 @@
 name: CI/CD Pipeline for CSC325 Django Assignment
 
-on: 
+on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build-test-deploy:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-    - name: Install dependencies
-      run: |
-        python -m pip install django
-        pip install -r requirements.txt
-    - name: Run tests
-      run: |
-        python manage.py test
-        - name: Deploy to Heroku
-        run: 
-          echo "Deploying to the django app..."
-          # Add your deployment steps here
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+  dependencies:
+    name: Dependencies
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Install packages
+        run: python -m pip install -r requirements.txt
+
+  test:
+    name: Test
+    needs: dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Install packages
+        run: python -m pip install -r requirements.txt
+
+      - name: Run Django tests
+        run: python manage.py test
+
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.14.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
