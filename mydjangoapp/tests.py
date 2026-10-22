@@ -21,4 +21,10 @@ class ViewTests(TestCase):
 			response.content.decode(),
 			"This part of the program is my about page.",
 		)
-
+	def test_status_page(self):
+		response = self.client.get(reverse("status"))
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(
+			response.content.decode(),
+			"This is the status page, it shows the status of the application, meaning whether it's running or not.",
+		)
