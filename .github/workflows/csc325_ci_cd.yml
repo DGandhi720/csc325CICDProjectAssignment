@@ -6,6 +6,7 @@ on:
       - main
 
 jobs:
+  # Stage 1: Check out the code and install the tutorial's Python version.
   setup:
     name: Setup
     runs-on: ubuntu-latest
@@ -19,6 +20,7 @@ jobs:
         with:
           python-version: "3.8"
 
+  # Stage 2: Before running tests, this will simply just install any needing dependencies.
   dependencies:
     name: Dependencies
     needs: setup
@@ -36,6 +38,7 @@ jobs:
       - name: Install packages
         run: python -m pip install -r requirements.txt
 
+  # Stage 3: Runs the Django test suite; if any fails occur, it'll stop the pipeline.
   test:
     name: Test
     needs: dependencies
@@ -56,8 +59,10 @@ jobs:
       - name: Run Django tests
         run: python manage.py test
 
+  # Stage 4: And once all tests are passed, this will run the deploy, the final step.
   deploy:
     name: Deploy
+    # This dependency prevents Deploy from starting unless Test passes.
     needs: test
     runs-on: ubuntu-latest
 
